@@ -1181,7 +1181,7 @@ mod dispatch_impl {
 
         let req = Request::builder()
             .uri(&*format!("http://{}/a", addr))
-            .body(Body::empty())
+            .body(http_body_util::Empty::new())
             .unwrap();
         let res = client.request(req).map_ok(move |res| {
             assert_eq!(res.status(), hyper::StatusCode::OK);
@@ -1234,7 +1234,7 @@ mod dispatch_impl {
 
             let req = Request::builder()
                 .uri(&*format!("http://{}/a", addr))
-                .body(Body::empty())
+                .body(http_body_util::Empty::new())
                 .unwrap();
             client
                 .request(req)
@@ -1297,7 +1297,7 @@ mod dispatch_impl {
 
         let req = Request::builder()
             .uri(&*format!("http://{}/a", addr))
-            .body(Body::empty())
+            .body(http_body_util::Empty::new())
             .unwrap();
         let res = client.request(req).and_then(move |res| {
             assert_eq!(res.status(), hyper::StatusCode::OK);
@@ -1360,7 +1360,7 @@ mod dispatch_impl {
 
             let req = Request::builder()
                 .uri(&*format!("http://{}/a", addr))
-                .body(Body::empty())
+                .body(http_body_util::Empty::new())
                 .unwrap();
             client.request(req).map(|_| unreachable!())
         };
@@ -1413,7 +1413,7 @@ mod dispatch_impl {
 
             let req = Request::builder()
                 .uri(&*format!("http://{}/a", addr))
-                .body(Body::empty())
+                .body(http_body_util::Empty::new())
                 .unwrap();
             // notably, haven't read body yet
             client.request(req)
@@ -1464,7 +1464,7 @@ mod dispatch_impl {
 
         let req = Request::builder()
             .uri(&*format!("http://{}/a", addr))
-            .body(Body::empty())
+            .body(http_body_util::Empty::new())
             .unwrap();
         let res = client.request(req).and_then(move |res| {
             assert_eq!(res.status(), hyper::StatusCode::OK);
@@ -1511,7 +1511,7 @@ mod dispatch_impl {
 
         let req = Request::builder()
             .uri(&*format!("http://{}/a", addr))
-            .body(Body::empty())
+            .body(http_body_util::Empty::new())
             .unwrap();
         let res = client.request(req).and_then(move |res| {
             assert_eq!(res.status(), hyper::StatusCode::OK);
@@ -1543,7 +1543,7 @@ mod dispatch_impl {
         assert_eq!(connects.load(Ordering::Relaxed), 0);
         let req = Request::builder()
             .uri("http://hyper.local/a")
-            .body(Body::empty())
+            .body(http_body_util::Empty::new())
             .unwrap();
         let _fut = client.request(req);
         // internal Connect::connect should have been lazy, and not
@@ -1590,7 +1590,7 @@ mod dispatch_impl {
         let rx = rx1.expect("thread panicked");
         let req = Request::builder()
             .uri(&*format!("http://{}/a", addr))
-            .body(Body::empty())
+            .body(http_body_util::Empty::new())
             .unwrap();
         let res = client.request(req);
         rt.block_on(future::join(res, rx).map(|r| r.0)).unwrap();
@@ -1604,7 +1604,7 @@ mod dispatch_impl {
         let rx = rx2.expect("thread panicked");
         let req = Request::builder()
             .uri(&*format!("http://{}/b", addr))
-            .body(Body::empty())
+            .body(http_body_util::Empty::new())
             .unwrap();
         let res = client.request(req);
         rt.block_on(future::join(res, rx).map(|r| r.0)).unwrap();
@@ -1661,7 +1661,7 @@ mod dispatch_impl {
         let req = Request::builder()
             .method("HEAD")
             .uri(&*format!("http://{}/a", addr))
-            .body(Body::empty())
+            .body(http_body_util::Empty::new())
             .unwrap();
         let res = client.request(req);
         rt.block_on(future::join(res, rx).map(|r| r.0)).unwrap();
@@ -1671,7 +1671,7 @@ mod dispatch_impl {
         let rx = rx2.expect("thread panicked");
         let req = Request::builder()
             .uri(&*format!("http://{}/b", addr))
-            .body(Body::empty())
+            .body(http_body_util::Empty::new())
             .unwrap();
         let res = client.request(req);
         rt.block_on(future::join(res, rx).map(|r| r.0)).unwrap();
@@ -1804,7 +1804,7 @@ mod dispatch_impl {
         let rx = rx1.expect("thread panicked");
         let req = Request::builder()
             .uri(&*format!("http://{}/a", addr))
-            .body(Body::empty())
+            .body(http_body_util::Empty::new())
             .unwrap();
         let fut = client.request(req);
 
@@ -1828,7 +1828,7 @@ mod dispatch_impl {
         let rx = rx2.expect("thread panicked");
         let req = Request::builder()
             .uri(&*format!("http://{}/b", addr))
-            .body(Body::empty())
+            .body(http_body_util::Empty::new())
             .unwrap();
         let fut = client.request(req);
         future::join(fut, rx).map(|r| r.0).await.unwrap();
@@ -1874,7 +1874,7 @@ mod dispatch_impl {
         let rx = rx1.expect("thread panicked");
         let req = Request::builder()
             .uri(&*format!("http://{}/foo/bar", addr))
-            .body(Body::empty())
+            .body(http_body_util::Empty::new())
             .unwrap();
         let res = client.request(req);
         rt.block_on(future::join(res, rx).map(|r| r.0)).unwrap();
@@ -1914,7 +1914,7 @@ mod dispatch_impl {
         let req = Request::builder()
             .method("CONNECT")
             .uri(&*format!("http://{}/useless/path", addr))
-            .body(Body::empty())
+            .body(http_body_util::Empty::new())
             .unwrap();
         let res = client.request(req);
         rt.block_on(future::join(res, rx).map(|r| r.0)).unwrap();
@@ -1962,7 +1962,7 @@ mod dispatch_impl {
         let req = Request::builder()
             .method("GET")
             .uri(&*format!("http://{}/up", addr))
-            .body(Body::empty())
+            .body(http_body_util::Empty::new())
             .unwrap();
 
         let res = client.request(req);
@@ -2008,7 +2008,7 @@ mod dispatch_impl {
                     socket,
                     service_fn(|req| async move {
                         assert_eq!(req.headers().get("host"), None);
-                        Ok::<_, hyper::Error>(Response::new(Body::empty()))
+                        Ok::<_, hyper::Error>(Response::new(http_body_util::Empty::new()))
                     }),
                 )
                 .await
@@ -2778,7 +2778,7 @@ mod conn {
             .http2_only(true)
             .serve(make_service_fn(|_| async move {
                 Ok::<_, hyper::Error>(service_fn(|_req| {
-                    future::ok::<_, hyper::Error>(Response::new(Body::empty()))
+                    future::ok::<_, hyper::Error>(Response::new(http_body_util::Empty::new()))
                 }))
             }));
         let addr = server.local_addr();
@@ -2810,7 +2810,7 @@ mod conn {
 
         let req = Request::builder()
             .uri(format!("http://{}/", addr))
-            .body(Body::empty())
+            .body(http_body_util::Empty::new())
             .expect("request builder");
 
         client.send_request(req).await.expect("req1 send");
@@ -2937,7 +2937,7 @@ mod conn {
             assert!(err.is_timeout());
         });
 
-        let req = http::Request::new(hyper::Body::empty());
+        let req = http::Request::new(hyper::http_body_util::Empty::new());
         let err = client
             .send_request(req)
             .await
@@ -2980,7 +2980,7 @@ mod conn {
                                 .await
                                 .expect("server req body aggregate");
                         });
-                        Ok::<_, hyper::Error>(http::Response::new(hyper::Body::empty()))
+                        Ok::<_, hyper::Error>(http::Response::new(hyper::http_body_util::Empty::new()))
                     }),
                 )
                 .await
@@ -3058,7 +3058,7 @@ mod conn {
         });
 
         let req = Request::connect("localhost")
-            .body(hyper::Body::empty())
+            .body(hyper::http_body_util::Empty::new())
             .unwrap();
         let res = client.send_request(req).await.expect("send_request");
         assert_eq!(res.status(), StatusCode::OK);
@@ -3114,7 +3114,7 @@ mod conn {
         });
 
         let req = Request::connect("localhost")
-            .body(hyper::Body::empty())
+            .body(hyper::http_body_util::Empty::new())
             .unwrap();
         let res = client.send_request(req).await.expect("send_request");
         assert_eq!(res.status(), StatusCode::BAD_REQUEST);

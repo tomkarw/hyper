@@ -35,7 +35,7 @@ async fn server_upgraded_io(mut upgraded: Upgraded) -> Result<()> {
 
 /// Our server HTTP handler to initiate HTTP upgrades.
 async fn server_upgrade(mut req: Request<Body>) -> Result<Response<Body>> {
-    let mut res = Response::new(Body::empty());
+    let mut res = Response::new(http_body_util::Empty::new());
 
     // Send a 400 to any request that doesn't have
     // an `Upgrade` header.
@@ -89,7 +89,7 @@ async fn client_upgrade_request(addr: SocketAddr) -> Result<()> {
     let req = Request::builder()
         .uri(format!("http://{}/", addr))
         .header(UPGRADE, "foobar")
-        .body(Body::empty())
+        .body(http_body_util::Empty::new())
         .unwrap();
 
     let res = Client::new().request(req).await?;

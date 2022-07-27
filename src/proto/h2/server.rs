@@ -7,6 +7,7 @@ use bytes::Bytes;
 use h2::server::{Connection, Handshake, SendResponse};
 use h2::{Reason, RecvStream};
 use http::{Method, Request};
+use http_body_util::{Either, Empty};
 use pin_project_lite::pin_project;
 use tokio::io::{AsyncRead, AsyncWrite};
 use tracing::{debug, trace, warn};
@@ -236,7 +237,7 @@ where
         exec: &mut E,
     ) -> Poll<crate::Result<()>>
     where
-        S: HttpService<Body, ResBody = B>,
+        S: HttpService<B, ResBody = B>,
         S::Error: Into<Box<dyn StdError + Send + Sync>>,
         E: ConnStreamExec<S::Future, B>,
     {
@@ -295,7 +296,7 @@ where
                             (
                                 Request::from_parts(
                                     parts,
-                                    crate::Body::h2(stream, content_length.into(), ping),
+                                    Either::Left(crate::Body::h2(stream, content_length.into(), ping)),
                                 ),
                                 None,
                             )
@@ -309,7 +310,7 @@ where
                             debug_assert!(parts.extensions.get::<OnUpgrade>().is_none());
                             parts.extensions.insert(upgrade);
                             (
-                                Request::from_parts(parts, crate::Body::empty()),
+                                Request::from_parts(parts, Either::Right(Empty::new())),
                                 Some(ConnectParts {
                                     pending,
                                     ping,

@@ -93,7 +93,7 @@ async fn param_example(req: Request<Body>) -> Result<Response<Body>, hyper::Erro
         }
         _ => Ok(Response::builder()
             .status(StatusCode::NOT_FOUND)
-            .body(Body::empty())
+            .body(http_body_util::Empty::new())
             .unwrap()),
     }
 }

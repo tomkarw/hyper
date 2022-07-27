@@ -2,6 +2,7 @@ use std::error::Error as StdError;
 
 use bytes::{Buf, Bytes};
 use http::Request;
+use http_body_util::{Either, Empty};
 use tokio::io::{AsyncRead, AsyncWrite};
 use tracing::{debug, trace};
 
@@ -248,11 +249,11 @@ where
         match ready!(self.conn.poll_read_head(cx)) {
             Some(Ok((mut head, body_len, wants))) => {
                 let body = match body_len {
-                    DecodedLength::ZERO => Body::empty(),
+                    DecodedLength::ZERO => Either::Left(Empty::new()),
                     other => {
                         let (tx, rx) = Body::new_channel(other, wants.contains(Wants::EXPECT));
                         self.body_tx = Some(tx);
-                        rx
+                        Either::Right(rx)
                     }
                 };
                 if wants.contains(Wants::UPGRADE) {
@@ -471,14 +472,14 @@ cfg_server! {
     // Service is never pinned
     impl<S: HttpService<B>, B> Unpin for Server<S, B> {}
 
-    impl<S, Bs> Dispatch for Server<S, Body>
+    impl<S, B> Dispatch for Server<S, B>
     where
-        S: HttpService<Body, ResBody = Bs>,
+        S: HttpService<B, ResBody = B>,
         S::Error: Into<Box<dyn StdError + Send + Sync>>,
-        Bs: HttpBody,
+        B: HttpBody,
     {
         type PollItem = MessageHead<http::StatusCode>;
-        type PollBody = Bs;
+        type PollBody = B;
         type PollError = S::Error;
         type RecvItem = RequestHead;
 
@@ -506,7 +507,7 @@ cfg_server! {
             ret
         }
 
-        fn recv_msg(&mut self, msg: crate::Result<(Self::RecvItem, Body)>) -> crate::Result<()> {
+        fn recv_msg(&mut self, msg: crate::Result<(Self::RecvItem, B)>) -> crate::Result<()> {
             let (msg, body) = msg?;
             let mut req = Request::new(body);
             *req.method_mut() = msg.subject.0;
@@ -595,7 +596,7 @@ cfg_client! {
             }
         }
 
-        fn recv_msg(&mut self, msg: crate::Result<(Self::RecvItem, Body)>) -> crate::Result<()> {
+        fn recv_msg(&mut self, msg: crate::Result<(Self::RecvItem, B)>) -> crate::Result<()> {
             match msg {
                 Ok((msg, body)) => {
                     if let Some(cb) = self.callback.take() {
@@ -677,7 +678,7 @@ mod tests {
             handle.read(b"HTTP/1.1 200 OK\r\n\r\n");
 
             let mut res_rx = tx
-                .try_send(crate::Request::new(crate::Body::empty()))
+                .try_send(crate::Request::new(Empty::new()))
                 .unwrap();
 
             tokio_test::assert_ready_ok!(Pin::new(&mut dispatcher).poll(cx));

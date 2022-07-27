@@ -976,7 +976,7 @@ async fn expect_continue_waits_for_body_poll() {
                     drop(req);
                     Response::builder()
                         .status(StatusCode::BAD_REQUEST)
-                        .body(hyper::Body::empty())
+                        .body(hyper::http_body_util::Empty::new())
                 })
             }),
         )
@@ -1269,7 +1269,7 @@ async fn http1_allow_half_close() {
             socket,
             service_fn(|_| {
                 tokio::time::sleep(Duration::from_millis(500))
-                    .map(|_| Ok::<_, hyper::Error>(Response::new(Body::empty())))
+                    .map(|_| Ok::<_, hyper::Error>(Response::new(http_body_util::Empty::new())))
             }),
         )
         .await
@@ -1330,7 +1330,7 @@ async fn returning_1xx_response_is_error() {
                 Ok::<_, hyper::Error>(
                     Response::builder()
                         .status(StatusCode::CONTINUE)
-                        .body(Body::empty())
+                        .body(http_body_util::Empty::new())
                         .unwrap(),
                 )
             }),
@@ -1395,7 +1395,7 @@ async fn header_read_timeout_slow_writes() {
             service_fn(|_| {
                 let res = Response::builder()
                     .status(200)
-                    .body(hyper::Body::empty())
+                    .body(hyper::http_body_util::Empty::new())
                     .unwrap();
                 future::ready(Ok::<_, hyper::Error>(res))
             }),
@@ -1470,7 +1470,7 @@ async fn header_read_timeout_slow_writes_multiple_requests() {
             service_fn(|_| {
                 let res = Response::builder()
                     .status(200)
-                    .body(hyper::Body::empty())
+                    .body(hyper::http_body_util::Empty::new())
                     .unwrap();
                 future::ready(Ok::<_, hyper::Error>(res))
             }),
@@ -1518,7 +1518,7 @@ async fn upgrades() {
             let res = Response::builder()
                 .status(101)
                 .header("upgrade", "foobar")
-                .body(hyper::Body::empty())
+                .body(hyper::http_body_util::Empty::new())
                 .unwrap();
             future::ready(Ok::<_, hyper::Error>(res))
         }),
@@ -1574,7 +1574,7 @@ async fn http_connect() {
         service_fn(|_| {
             let res = Response::builder()
                 .status(200)
-                .body(hyper::Body::empty())
+                .body(hyper::http_body_util::Empty::new())
                 .unwrap();
             future::ready(Ok::<_, hyper::Error>(res))
         }),
@@ -1635,7 +1635,7 @@ async fn upgrades_new() {
             Response::builder()
                 .status(101)
                 .header("upgrade", "foobar")
-                .body(hyper::Body::empty())
+                .body(hyper::http_body_util::Empty::new())
                 .unwrap(),
         )
     });
@@ -1672,7 +1672,7 @@ async fn upgrades_ignored() {
     tokio::spawn(async move {
         let svc = service_fn(move |req: Request<Body>| {
             assert_eq!(req.headers()["upgrade"], "yolo");
-            future::ok::<_, hyper::Error>(Response::new(hyper::Body::empty()))
+            future::ok::<_, hyper::Error>(Response::new(hyper::http_body_util::Empty::new()))
         });
 
         let (socket, _) = listener.accept().await.unwrap();
@@ -1691,7 +1691,7 @@ async fn upgrades_ignored() {
             .uri(&*url)
             .header("upgrade", "yolo")
             .header("connection", "upgrade")
-            .body(hyper::Body::empty())
+            .body(hyper::http_body_util::Empty::new())
             .expect("make_req")
     };
 
@@ -1741,7 +1741,7 @@ async fn http_connect_new() {
         future::ok::<_, hyper::Error>(
             Response::builder()
                 .status(200)
-                .body(hyper::Body::empty())
+                .body(hyper::http_body_util::Empty::new())
                 .unwrap(),
         )
     });
@@ -1825,7 +1825,7 @@ async fn h2_connect() {
         future::ok::<_, hyper::Error>(
             Response::builder()
                 .status(200)
-                .body(hyper::Body::empty())
+                .body(hyper::http_body_util::Empty::new())
                 .unwrap(),
         )
     });
@@ -1938,7 +1938,7 @@ async fn h2_connect_multiplex() {
         future::ok::<_, hyper::Error>(
             Response::builder()
                 .status(200)
-                .body(hyper::Body::empty())
+                .body(hyper::http_body_util::Empty::new())
                 .unwrap(),
         )
     });
@@ -2015,7 +2015,7 @@ async fn h2_connect_large_body() {
         future::ok::<_, hyper::Error>(
             Response::builder()
                 .status(200)
-                .body(hyper::Body::empty())
+                .body(hyper::http_body_util::Empty::new())
                 .unwrap(),
         )
     });
@@ -2089,7 +2089,7 @@ async fn h2_connect_empty_frames() {
         future::ok::<_, hyper::Error>(
             Response::builder()
                 .status(200)
-                .body(hyper::Body::empty())
+                .body(hyper::http_body_util::Empty::new())
                 .unwrap(),
         )
     });
@@ -2545,7 +2545,7 @@ async fn http2_keep_alive_with_responsive_client() {
 
     tokio::time::sleep(Duration::from_secs(4)).await;
 
-    let req = http::Request::new(hyper::Body::empty());
+    let req = http::Request::new(hyper::http_body_util::Empty::new());
     client.send_request(req).await.expect("client.send_request");
 }
 

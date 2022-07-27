@@ -134,7 +134,7 @@ where
     /// let req = Request::builder()
     ///     .uri("/foo/bar")
     ///     .header(HOST, "hyper.rs")
-    ///     .body(Body::empty())
+    ///     .body(http_body_util::Empty::new())
     ///     .unwrap();
     ///
     /// // send it and await a Response

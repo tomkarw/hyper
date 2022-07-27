@@ -1,4 +1,3 @@
-use std::borrow::Cow;
 use std::fmt;
 
 use bytes::Bytes;
@@ -104,21 +103,6 @@ const WANT_PENDING: usize = 1;
 const WANT_READY: usize = 2;
 
 impl Body {
-    /// Create an empty `Body` stream.
-    ///
-    /// # Example
-    ///
-    /// ```
-    /// use hyper::{Body, Request};
-    ///
-    /// // create a `GET /` request
-    /// let get = Request::new(Body::empty());
-    /// ```
-    #[inline]
-    pub fn empty() -> Body {
-        Body::new(Kind::Once(None))
-    }
-
     /// Create a `Body` stream with an associated sender half.
     ///
     /// Useful when wanting to stream chunks from another thread.
@@ -297,14 +281,6 @@ impl Body {
     }
 }
 
-impl Default for Body {
-    /// Returns `Body::empty()`.
-    #[inline]
-    fn default() -> Body {
-        Body::empty()
-    }
-}
-
 impl HttpBody for Body {
     type Data = Bytes;
     type Error = crate::Error;
@@ -399,65 +375,6 @@ impl fmt::Debug for Body {
         };
 
         builder.finish()
-    }
-}
-
-impl From<Bytes> for Body {
-    #[inline]
-    fn from(chunk: Bytes) -> Body {
-        if chunk.is_empty() {
-            Body::empty()
-        } else {
-            Body::new(Kind::Once(Some(chunk)))
-        }
-    }
-}
-
-impl From<Vec<u8>> for Body {
-    #[inline]
-    fn from(vec: Vec<u8>) -> Body {
-        Body::from(Bytes::from(vec))
-    }
-}
-
-impl From<&'static [u8]> for Body {
-    #[inline]
-    fn from(slice: &'static [u8]) -> Body {
-        Body::from(Bytes::from(slice))
-    }
-}
-
-impl From<Cow<'static, [u8]>> for Body {
-    #[inline]
-    fn from(cow: Cow<'static, [u8]>) -> Body {
-        match cow {
-            Cow::Borrowed(b) => Body::from(b),
-            Cow::Owned(o) => Body::from(o),
-        }
-    }
-}
-
-impl From<String> for Body {
-    #[inline]
-    fn from(s: String) -> Body {
-        Body::from(Bytes::from(s.into_bytes()))
-    }
-}
-
-impl From<&'static str> for Body {
-    #[inline]
-    fn from(slice: &'static str) -> Body {
-        Body::from(Bytes::from(slice.as_bytes()))
-    }
-}
-
-impl From<Cow<'static, str>> for Body {
-    #[inline]
-    fn from(cow: Cow<'static, str>) -> Body {
-        match cow {
-            Cow::Borrowed(b) => Body::from(b),
-            Cow::Owned(o) => Body::from(o),
-        }
     }
 }
 
@@ -597,7 +514,7 @@ mod tests {
 
         eq(Body::from("Hello"), SizeHint::with_exact(5), "from str");
 
-        eq(Body::empty(), SizeHint::with_exact(0), "empty");
+        eq(http_body_util::Empty::new(), SizeHint::with_exact(0), "empty");
 
         eq(Body::channel().1, SizeHint::new(), "channel");
 

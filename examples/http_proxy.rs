@@ -73,7 +73,7 @@ async fn proxy(client: HttpClient, req: Request<Body>) -> Result<Response<Body>,
                 }
             });
 
-            Ok(Response::new(Body::empty()))
+            Ok(Response::new(http_body_util::Empty::new()))
         } else {
             eprintln!("CONNECT host is not socket addr: {:?}", req.uri());
             let mut resp = Response::new(Body::from("CONNECT must be to a socket address"));
